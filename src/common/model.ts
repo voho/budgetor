@@ -1,17 +1,11 @@
 export interface UserRoot {
   categories: Category[];
-  timeRoots: TimeRoot[];
-  regularTransactions: Transaction[];
-  defaultCurrency: Currency;
-}
-
-export interface TimeRoot {
-  year: number;
-  month: number;
   transactions: Transaction[];
+  defaultCurrency: string;
 }
 
 export interface Transaction {
+  isoDate: string;
   label: string;
   categoryId: string;
   amount: Money;
@@ -19,7 +13,7 @@ export interface Transaction {
 
 export interface Money {
   value: number;
-  currency: Currency;
+  currency: string;
 }
 
 export interface Category {
@@ -27,4 +21,7 @@ export interface Category {
   label: string;
 }
 
-export type Currency = string;
+export interface TransactionEditorState {
+  transaction: Transaction;
+  index: number;
+}

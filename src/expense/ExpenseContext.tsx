@@ -1,16 +1,19 @@
 import React, {
   PropsWithChildren,
   useCallback,
+  useContext,
   useEffect,
-  useState,
 } from "react";
 import { UserRoot } from "../common/model";
-import { loadUserRoot, saveUserRoot } from "../common/database";
+import { useDatabase } from "../common/database";
+import { LoginContext } from "./LoginContext";
 
 interface ExpenseContextInterface {
+  loading: boolean;
+  success: boolean;
+  error: string;
   value: UserRoot;
-  setValue: (oldValue: UserRoot) => void;
-  save: () => void;
+  setValue: (newValue: UserRoot) => void;
 }
 
 export const DEFAULT_VALUE: UserRoot = {
@@ -31,14 +34,15 @@ export const DEFAULT_VALUE: UserRoot = {
     { id: "income", label: "Income" },
   ],
   defaultCurrency: "CZK",
-  regularTransactions: [],
-  timeRoots: [],
+  transactions: [],
 };
 
 export const DEFAULT_CONTEXT_VALUE: ExpenseContextInterface = {
+  loading: false,
+  success: false,
+  error: "",
   value: DEFAULT_VALUE,
   setValue: () => {},
-  save: () => {},
 };
 
 export const ExpenseContext = React.createContext<ExpenseContextInterface>(
@@ -50,47 +54,32 @@ interface Props {}
 export const ExpenseContextProvider: React.FC<Props> = (
   props: PropsWithChildren<Props>,
 ) => {
-  const [value, setValueState] = useState(DEFAULT_VALUE);
-  const [error, setError] = useState("");
-
-  console.log("expense context");
+  const { load, save, data, error, success, loading } = useDatabase();
+  const { loggedUserId } = useContext(LoginContext);
 
   useEffect(() => {
-    // initial data load
-    console.log("initial load");
-    setError("");
-    loadUserRoot()
-      .then((root) => {
-        console.log("fetched", root);
-        if (root === null) {
-          setValueState(DEFAULT_VALUE);
-          setError("");
-        } else {
-          setValueState(root);
-          setError("");
-        }
-      })
-      .catch((error) => {
-        console.log("error", error);
-        setError(error.toString());
-      });
-  }, []);
+    if (loggedUserId) {
+      // initial data load
+      load();
+    }
+  }, [loggedUserId, load]);
 
-  const setValue = useCallback((newValue: UserRoot) => {
-    // updates the value in database after change
-    setValueState(newValue);
-    saveUserRoot(newValue);
-  }, []);
+  const setValue = useCallback(
+    (newValue: UserRoot) => {
+      if (loggedUserId) {
+        // updates the value in database after change
+        save(newValue);
+      }
+    },
+    [loggedUserId, save],
+  );
 
-  const save = useCallback(() => {
-    console.log("saving", value);
-    saveUserRoot(value);
-  }, [value]);
-
-  const contextValue = {
-    value,
+  const contextValue: ExpenseContextInterface = {
+    value: data ?? DEFAULT_VALUE,
     setValue,
-    save,
+    error,
+    success,
+    loading,
   };
 
   return (

@@ -1,11 +1,9 @@
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  signOut,
-  setPersistence,
-  browserLocalPersistence,
-} from "firebase/auth";
-import React, { PropsWithChildren, useCallback, useState } from "react";
+import React, {
+  PropsWithChildren,
+  useCallback,
+  useContext,
+  useState,
+} from "react";
 import { getLocalStorageValue } from "../common/utils";
 import {
   Button,
@@ -16,46 +14,20 @@ import {
   Stack,
   Typography,
 } from "@mui/joy";
+import { LoginContext } from "../expense/LoginContext";
 
 interface Props {}
 
 export const LoginForm: React.FC<Props> = (props: PropsWithChildren<Props>) => {
   const [email, setEmail] = useState(getLocalStorageValue("user-email", ""));
   const [password, setPassword] = useState("");
-  const [loggedUser, setLoggedUser] = useState("");
+  const { handleLogin, handleLogout, loggedUserName } =
+    useContext(LoginContext);
 
-  const handleLogin = useCallback(() => {
-    const auth = getAuth();
-    setPersistence(auth, browserLocalPersistence);
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        setLoggedUser(
-          userCredential.user.displayName ??
-            userCredential.user.email ??
-            userCredential.user.uid,
-        );
-      })
-      .catch((error) => {
-        console.error(error);
-        setLoggedUser("");
-      });
-  }, [email, password]);
-
-  const handleLogout = useCallback(() => {
-    const auth = getAuth();
-    signOut(auth)
-      .then(() => {
-        window.location.reload();
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, []);
-
-  if (loggedUser !== "") {
+  if (loggedUserName !== "") {
     return (
-      <Sheet variant="solid" sx={{ p: 2 }}>
-        <Sheet color={"neutral"} sx={{ width: "80%", mx: "auto", p: 4 }}>
+      <Sheet variant="outlined" sx={{ p: 2 }}>
+        <Sheet sx={{ width: "80%", mx: "auto", p: 4 }}>
           <Sheet sx={{ p: 1, mb: 2 }}>
             <Stack
               direction={"row"}
@@ -67,7 +39,7 @@ export const LoginForm: React.FC<Props> = (props: PropsWithChildren<Props>) => {
                 Logged user:
               </Typography>
               <Typography color="neutral" level="body-md">
-                {loggedUser}
+                {loggedUserName}
               </Typography>
               <Button
                 size="sm"
@@ -137,7 +109,7 @@ export const LoginForm: React.FC<Props> = (props: PropsWithChildren<Props>) => {
         <Button
           type="submit"
           onClick={() => {
-            handleLogin();
+            handleLogin(email, password);
           }}
         >
           Login
