@@ -22,12 +22,5 @@ export const Status: React.FC<Props> = (props) => {
       </Sheet>
     );
   }
-  if (props.success) {
-    return (
-      <Sheet color="success" variant="soft" sx={{ p: 2 }}>
-        Success!
-      </Sheet>
-    );
-  }
   return <></>;
 };

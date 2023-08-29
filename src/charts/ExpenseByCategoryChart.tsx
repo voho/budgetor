@@ -1,48 +1,89 @@
-import React, { Component } from "react";
+import React from "react";
 import Chart from "react-apexcharts";
 import { Transaction } from "../common/model";
+import { Stack } from "@mui/joy";
 
 interface Props {
   transactions: Transaction[];
 }
 
 export const ExpenseByCategoryChart: React.FC<Props> = (props) => {
-  const sumByCategpry = new Map<string, number>();
+  const sumByCategpryCost = new Map<string, number>();
+  const sumByCategpryIncome = new Map<string, number>();
+
   props.transactions.forEach((transaction) => {
-    if (sumByCategpry.has(transaction.categoryId)) {
-      // add
-      sumByCategpry.set(
-        transaction.categoryId,
-        (sumByCategpry.get(transaction.categoryId) ?? 0) +
+    if (transaction.amount.value >= 0) {
+      if (sumByCategpryIncome.has(transaction.categoryId)) {
+        // add
+        sumByCategpryIncome.set(
+          transaction.categoryId,
+          (sumByCategpryIncome.get(transaction.categoryId) ?? 0) +
+            transaction.amount.value,
+        );
+      } else {
+        // first
+        sumByCategpryIncome.set(
+          transaction.categoryId,
           transaction.amount.value,
-      );
+        );
+      }
     } else {
-      // first
-      sumByCategpry.set(transaction.categoryId, transaction.amount.value);
+      if (sumByCategpryCost.has(transaction.categoryId)) {
+        // add
+        sumByCategpryCost.set(
+          transaction.categoryId,
+          (sumByCategpryCost.get(transaction.categoryId) ?? 0) -
+            transaction.amount.value,
+        );
+      } else {
+        // first
+        sumByCategpryCost.set(
+          transaction.categoryId,
+          -transaction.amount.value,
+        );
+      }
     }
   });
 
-  const series: number[] = [];
-  const labels: string[] = [];
+  const seriesIncome: number[] = [];
+  const labelsIncome: string[] = [];
+  const seriesCost: number[] = [];
+  const labelsCost: string[] = [];
 
-  sumByCategpry.forEach((value, key) => {
-    series.push(value);
-    labels.push(key);
+  sumByCategpryCost.forEach((value, key) => {
+    seriesCost.push(value);
+    labelsCost.push(key);
   });
 
-  const state = {
-    options: {
-      labels,
-    },
-    series,
-  };
+  sumByCategpryIncome.forEach((value, key) => {
+    seriesIncome.push(value);
+    labelsIncome.push(key);
+  });
 
   return (
-    <Chart
-      options={state.options}
-      series={state.series}
-      type="donut"
-      width="500"
-    />
+    <Stack direction={"column"} gap={1}>
+      <Chart
+        options={{
+          labels: labelsIncome,
+          theme: { palette: "pallete2" },
+          title: { text: "Income", align: "center" },
+          legend: { horizontalAlign: "right", position: "bottom" },
+        }}
+        series={seriesIncome}
+        type="pie"
+        width="400"
+      />
+      <Chart
+        options={{
+          labels: labelsCost,
+          theme: { palette: "pallete10" },
+          title: { text: "Expense", align: "center" },
+          legend: { horizontalAlign: "right", position: "bottom" },
+        }}
+        series={seriesCost}
+        type="pie"
+        width="400"
+      />
+    </Stack>
   );
 };

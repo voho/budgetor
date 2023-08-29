@@ -11,6 +11,7 @@ import {
   Grid,
   Typography,
   ButtonGroup,
+  Textarea,
 } from "@mui/joy";
 
 interface Props {
@@ -38,7 +39,7 @@ export const TransactionForm: React.FC<Props> = (props) => {
   }, [props.editing]);
 
   return (
-    <Sheet variant="soft" color={isNew ? "primary" : "neutral"} sx={{ p: 4 }}>
+    <Sheet sx={{ p: 2 }}>
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -64,25 +65,25 @@ export const TransactionForm: React.FC<Props> = (props) => {
             <Typography level="h4" component="h1">
               {isNew
                 ? "New transaction"
-                : "Edit transaction " + props.editing?.index}
+                : "Edit transaction #" + props.editing?.index}
             </Typography>
           </Grid>
           <Grid xs={4} textAlign={"right"}>
             <ButtonGroup sx={{ placeContent: "flex-end" }}>
-              <Button type="submit">Submit</Button>
-              {!isNew && (
-                <Button
-                  color="danger"
-                  onClick={() => {
-                    props.onEditingCancel();
-                  }}
-                >
-                  Cancel
-                </Button>
-              )}
+              <Button color="success" type="submit">
+                Submit
+              </Button>
+              <Button
+                color="danger"
+                onClick={() => {
+                  props.onEditingCancel();
+                }}
+              >
+                Cancel
+              </Button>
             </ButtonGroup>
           </Grid>
-          <Grid xs={6}>
+          <Grid xs={4}>
             <FormControl>
               <FormLabel>Date (UTC, ISO)</FormLabel>
               <Input
@@ -94,19 +95,7 @@ export const TransactionForm: React.FC<Props> = (props) => {
               />
             </FormControl>
           </Grid>
-          <Grid xs={6}>
-            <FormControl>
-              <FormLabel>Label</FormLabel>
-              <Input
-                placeholder="Label"
-                value={label}
-                onChange={(e) => {
-                  setLabel(e.target.value);
-                }}
-              />
-            </FormControl>
-          </Grid>
-          <Grid xs={6}>
+          <Grid xs={4}>
             <FormControl>
               <FormLabel>Category</FormLabel>
               <Input
@@ -118,7 +107,7 @@ export const TransactionForm: React.FC<Props> = (props) => {
               />
             </FormControl>
           </Grid>
-          <Grid xs={6}>
+          <Grid xs={4}>
             <FormControl>
               <FormLabel>Amount</FormLabel>
               <Input
@@ -127,6 +116,19 @@ export const TransactionForm: React.FC<Props> = (props) => {
                 value={amount}
                 onChange={(e) => {
                   setAmount(parseFloat(e.target.value));
+                }}
+              />
+            </FormControl>
+          </Grid>
+          <Grid xs={12}>
+            <FormControl>
+              <FormLabel>Label</FormLabel>
+              <Textarea
+                placeholder="Label"
+                minRows={4}
+                value={label}
+                onChange={(e) => {
+                  setLabel(e.target.value);
                 }}
               />
             </FormControl>

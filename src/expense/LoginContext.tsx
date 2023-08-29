@@ -15,6 +15,7 @@ import { FirebaseContext } from "./FirebaseContext";
 
 interface LoginContextInterface {
   loading: boolean;
+  error?: any;
   loggedUserId?: string;
   loggedUserName?: string;
   handleLogin: (email: string, password: string) => void;
@@ -39,11 +40,13 @@ export const LoginContextProvider: React.FC<Props> = (
   const [loggedUserId, setLoggedUserId] = useState("");
   const [loggedUserName, setLoggedUserName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState();
   const { app } = useContext(FirebaseContext);
 
   const handleLogin = useCallback(
     (email: string, password: string) => {
       const auth = getAuth(app);
+      setError(undefined);
       setLoading(true);
       setPersistence(auth, browserLocalPersistence);
       signInWithEmailAndPassword(auth, email, password)
@@ -57,7 +60,7 @@ export const LoginContextProvider: React.FC<Props> = (
           );
         })
         .catch((error) => {
-          console.error(error);
+          setError(error);
           setLoading(false);
           setLoggedUserId("");
           setLoggedUserName("");
@@ -81,6 +84,7 @@ export const LoginContextProvider: React.FC<Props> = (
     handleLogin,
     handleLogout,
     loading,
+    error,
     loggedUserId,
     loggedUserName,
   };

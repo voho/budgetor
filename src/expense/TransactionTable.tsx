@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, ButtonGroup, Table } from "@mui/joy";
+import { Button, ButtonGroup, Stack, Table, Typography } from "@mui/joy";
 import { Transaction } from "../common/model";
 import { MoneyLabel } from "./MoneyLabel";
 
@@ -14,23 +14,16 @@ export const TransactionTable: React.FC<Props> = (props) => {
     <Table variant="plain" borderAxis="xBetween">
       <thead>
         <tr>
-          <th>Date</th>
-          <th>Label</th>
-          <th>Category</th>
-          <th>Amount</th>
           <th>Actions</th>
+          <th>Date</th>
+          <th>Details</th>
+          <th>Amount</th>
         </tr>
       </thead>
       <tbody>
         {props.items.map((item, index) => {
           return (
             <tr key={index}>
-              <td>{item.isoDate}</td>
-              <td>{item.label}</td>
-              <td>{item.categoryId}</td>
-              <td>
-                <MoneyLabel value={item.amount} />
-              </td>
               <td>
                 <ButtonGroup>
                   <Button
@@ -52,6 +45,16 @@ export const TransactionTable: React.FC<Props> = (props) => {
                     Delete
                   </Button>
                 </ButtonGroup>
+              </td>
+              <td>{item.isoDate}</td>
+              <td>
+                <Stack direction={"column"} gap={1}>
+                  <Typography level="body-sm">{item.categoryId}</Typography>
+                  <Typography level="body-md">{item.label}</Typography>
+                </Stack>
+              </td>
+              <td>
+                <MoneyLabel value={item.amount} />
               </td>
             </tr>
           );

@@ -1,9 +1,4 @@
-import React, {
-  PropsWithChildren,
-  useCallback,
-  useContext,
-  useState,
-} from "react";
+import React, { PropsWithChildren, useContext, useState } from "react";
 import { getLocalStorageValue } from "../common/utils";
 import {
   Button,
@@ -21,38 +16,44 @@ interface Props {}
 export const LoginForm: React.FC<Props> = (props: PropsWithChildren<Props>) => {
   const [email, setEmail] = useState(getLocalStorageValue("user-email", ""));
   const [password, setPassword] = useState("");
-  const { handleLogin, handleLogout, loggedUserName } =
+  const { handleLogin, handleLogout, loggedUserName, loading, error } =
     useContext(LoginContext);
 
   if (loggedUserName !== "") {
     return (
-      <Sheet variant="outlined" sx={{ p: 2 }}>
-        <Sheet sx={{ width: "80%", mx: "auto", p: 4 }}>
-          <Sheet sx={{ p: 1, mb: 2 }}>
+      <Sheet variant="outlined" sx={{ p: 4 }}>
+        <Sheet sx={{ mx: "auto", p: 4 }}>
+          <Sheet sx={{ mb: 2 }}>
             <Stack
               direction={"row"}
-              spacing={2}
-              justifyContent="flex-end"
-              alignItems="center"
+              spacing={1}
+              justifyContent={"space-between"}
             >
-              <Typography color="neutral" level="body-sm">
-                Logged user:
-              </Typography>
-              <Typography color="neutral" level="body-md">
-                {loggedUserName}
-              </Typography>
-              <Button
-                size="sm"
-                variant="soft"
-                onClick={() => {
-                  handleLogout();
-                }}
+              <Typography level="h1">Budgetor</Typography>
+              <Stack
+                direction={"row"}
+                spacing={2}
+                justifyContent="flex-end"
+                alignItems="center"
               >
-                Logout
-              </Button>
+                <Typography color="neutral" level="body-sm">
+                  Logged user:
+                </Typography>
+                <Typography color="neutral" level="body-md">
+                  {loggedUserName}
+                </Typography>
+                <Button
+                  size="sm"
+                  variant="soft"
+                  onClick={() => {
+                    handleLogout();
+                  }}
+                >
+                  Logout
+                </Button>
+              </Stack>
             </Stack>
           </Sheet>
-
           {props.children}
         </Sheet>
       </Sheet>
@@ -63,10 +64,9 @@ export const LoginForm: React.FC<Props> = (props: PropsWithChildren<Props>) => {
     <Sheet
       sx={{
         width: 300,
-        mx: "auto", // margin left & right
-        my: 4, // margin top & bottom
-        py: 3, // padding top & bottom
-        px: 2, // padding left & right
+        mx: "auto",
+        my: 4,
+        p: 2,
         display: "flex",
         flexDirection: "column",
         gap: 2,
@@ -75,14 +75,15 @@ export const LoginForm: React.FC<Props> = (props: PropsWithChildren<Props>) => {
       }}
     >
       <Stack spacing={2}>
-        <div>
-          <Typography level="h4" component="h1">
-            Welcome!
+        <Stack direction={"column"} gap={1}>
+          <Typography level="h4">Welcome to Budgetor!</Typography>
+          <Typography level="body-sm">
+            Please sign in to continue. The app is crap anyway, so if you do not
+            have any account, you are not missing out...
           </Typography>
-          <Typography level="body-sm">Sign in to continue.</Typography>
-        </div>
+        </Stack>
         <FormControl>
-          <FormLabel>Email</FormLabel>
+          <FormLabel>E-mail</FormLabel>
           <Input
             placeholder="E-mail"
             value={email}
@@ -96,7 +97,7 @@ export const LoginForm: React.FC<Props> = (props: PropsWithChildren<Props>) => {
           />
         </FormControl>
         <FormControl>
-          <FormLabel>Email</FormLabel>
+          <FormLabel>Password</FormLabel>
           <Input
             placeholder="Password"
             type="password"
@@ -106,8 +107,20 @@ export const LoginForm: React.FC<Props> = (props: PropsWithChildren<Props>) => {
             }}
           />
         </FormControl>
+        {error && (
+          <Typography
+            borderRadius={5}
+            p={1}
+            variant="solid"
+            level="body-sm"
+            color="danger"
+          >
+            {error && error.message ? error.message : JSON.stringify(error)}
+          </Typography>
+        )}
         <Button
           type="submit"
+          loading={loading}
           onClick={() => {
             handleLogin(email, password);
           }}

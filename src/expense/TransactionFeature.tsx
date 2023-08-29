@@ -1,11 +1,11 @@
 import React, { useCallback, useContext, useState } from "react";
 import { TransactionTable } from "./TransactionTable";
 import { Stack } from "@mui/joy";
-import { TransactionForm } from "./TransactionForm";
 import { TransactionEditorState } from "../common/model";
 import { ExpenseContext } from "./ExpenseContext";
 import { Status } from "./Status";
 import { ChartFeature } from "./ChartFeature";
+import { TransactionModal } from "./TransactionModal";
 
 export const TransactionFeature: React.FC = () => {
   const [editing, setEditing] = useState<TransactionEditorState | undefined>();
@@ -39,19 +39,19 @@ export const TransactionFeature: React.FC = () => {
   return (
     <Stack direction={"column"} gap={2}>
       <Status error={error} success={success} loading={loading} />
-      <TransactionForm
+      <TransactionModal
         editing={editing}
+        setEditing={setEditing}
         onEditingSubmit={onEditingSubmit}
         onEditingCancel={onEditingCancel}
       />
-      <Stack direction={"row"}>
+      <Stack direction={"row"} gap={1}>
         <TransactionTable
           items={value.transactions}
           onEdit={(transaction, index) => {
             setEditing({ transaction, index });
           }}
           onDelete={(transaction, index) => {
-            setEditing({ transaction, index: -1 });
             const transactionsUpdated = [...value.transactions];
             transactionsUpdated.splice(index, 1);
             setValue({ ...value, transactions: transactionsUpdated });
