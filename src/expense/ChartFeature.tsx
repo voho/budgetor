@@ -3,7 +3,7 @@ import { ExpenseByCategoryChart } from "../charts/ExpenseByCategoryChart";
 import { ExpenseContext } from "./ExpenseContext";
 
 export const ChartFeature: React.FC = () => {
-  const { value } = useContext(ExpenseContext);
+  const { transactions } = useContext(ExpenseContext);
 
-  return <ExpenseByCategoryChart transactions={value.transactions} />;
+  return <ExpenseByCategoryChart transactions={transactions ?? []} />;
 };

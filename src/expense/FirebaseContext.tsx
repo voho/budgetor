@@ -1,8 +1,12 @@
 import React, { PropsWithChildren } from "react";
 import { FirebaseApp, initializeApp } from "@firebase/app";
+import { Auth, getAuth } from "firebase/auth";
+import { Database, getDatabase } from "firebase/database";
 
 interface FirebaseContextInterface {
   app?: FirebaseApp;
+  auth?: Auth;
+  db?: Database;
 }
 
 export const DEFAULT_CONTEXT_VALUE: FirebaseContextInterface = {};
@@ -28,9 +32,11 @@ export const FirebaseContextProvider: React.FC<Props> = (
   };
 
   const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
 
   return (
-    <FirebaseContext.Provider value={{ app }}>
+    <FirebaseContext.Provider value={{ app, auth, db }}>
       {props.children}
     </FirebaseContext.Provider>
   );

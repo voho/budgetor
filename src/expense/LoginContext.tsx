@@ -41,44 +41,47 @@ export const LoginContextProvider: React.FC<Props> = (
   const [loggedUserName, setLoggedUserName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
-  const { app } = useContext(FirebaseContext);
+  const { auth } = useContext(FirebaseContext);
 
   const handleLogin = useCallback(
     (email: string, password: string) => {
-      const auth = getAuth(app);
-      setError(undefined);
-      setLoading(true);
-      setPersistence(auth, browserLocalPersistence);
-      signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          setLoading(false);
-          setLoggedUserId(userCredential.user.uid);
-          setLoggedUserName(
-            userCredential.user.displayName ??
-              userCredential.user.email ??
-              userCredential.user.uid,
-          );
-        })
-        .catch((error) => {
-          setError(error);
-          setLoading(false);
-          setLoggedUserId("");
-          setLoggedUserName("");
-        });
+      if (auth) {
+        setError(undefined);
+        setLoading(true);
+        setPersistence(auth, browserLocalPersistence);
+        signInWithEmailAndPassword(auth, email, password)
+          .then((userCredential) => {
+            setLoggedUserId(userCredential.user.uid);
+            setLoggedUserName(
+              userCredential.user.displayName ??
+                userCredential.user.email ??
+                userCredential.user.uid,
+            );
+          })
+          .catch((error) => {
+            setError(error);
+            setLoggedUserId("");
+            setLoggedUserName("");
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      }
     },
-    [app],
+    [auth],
   );
 
   const handleLogout = useCallback(() => {
-    const auth = getAuth(app);
-    signOut(auth)
-      .then(() => {
-        window.location.reload();
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, [app]);
+    if (auth) {
+      signOut(auth)
+        .then(() => {
+          window.location.reload();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  }, [auth]);
 
   const contextValue: LoginContextInterface = {
     handleLogin,

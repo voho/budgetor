@@ -1,64 +1,74 @@
-import { getDatabase, onValue, ref, set } from "firebase/database";
-import { UserRoot } from "./model";
-import { getAuth } from "firebase/auth";
+import { get, ref, set } from "firebase/database";
+import { Transaction } from "./model";
 import { useCallback, useContext, useState } from "react";
-import { DEFAULT_VALUE } from "../expense/ExpenseContext";
 import { FirebaseContext } from "../expense/FirebaseContext";
+import { LoginContext } from "../expense/LoginContext";
 
 export const useDatabase = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const [data, setData] = useState<UserRoot | undefined>();
-  const { app } = useContext(FirebaseContext);
+  const { app, db } = useContext(FirebaseContext);
+  const { loggedUserId } = useContext(LoginContext);
 
-  const load = useCallback(() => {
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-    const uid = auth.currentUser?.uid;
-    setSuccess(false);
-    setError("");
-    setLoading(true);
-    if (uid) {
-      const rootRef = ref(db, "users/" + uid);
-      onValue(rootRef, (snapshot) => {
-        const data = snapshot.exists()
-          ? (snapshot.val() as UserRoot)
-          : DEFAULT_VALUE;
-        if (data.transactions === undefined) {
-          data.transactions = [];
-        }
-        setData(data);
-        setSuccess(true);
-        setLoading(false);
-      });
-    }
-  }, [app]);
-
-  const save = useCallback(
-    (newValue: UserRoot) => {
-      const auth = getAuth(app);
-      const db = getDatabase(app);
-      const uid = auth.currentUser?.uid;
-      setSuccess(false);
-      setError("");
-      setLoading(true);
-      if (uid) {
-        const rootRef = ref(db, "users/" + uid);
-        set(rootRef, newValue);
-        setData(newValue);
-        setSuccess(true);
-        setLoading(false);
+  const loadTransactions = useCallback(
+    (year: number, month: number, callback: (data: Transaction[]) => void) => {
+      console.log("inside load", db, loggedUserId);
+      if (db && loggedUserId) {
+        console.log("load trans", loggedUserId);
+        setSuccess(false);
+        setError("");
+        setLoading(true);
+        const rootRef = ref(
+          db,
+          `users/${loggedUserId}/transactions/${year}/${month}`,
+        );
+        get(rootRef)
+          .then((snapshot) => {
+            console.log("snap:", snapshot);
+            setSuccess(true);
+            callback(snapshot.exists() ? snapshot.val() : []);
+          })
+          .catch((e) => {
+            setError(e.toString());
+          })
+          .finally(() => {
+            setLoading(false);
+          });
       }
     },
-    [app],
+    [db, loggedUserId],
+  );
+
+  const saveTransactions = useCallback(
+    (year: number, month: number, transactions: Transaction[]) => {
+      if (db && loggedUserId && year && month) {
+        setSuccess(false);
+        setError("");
+        setLoading(true);
+        const rootRef = ref(
+          db,
+          `users/${loggedUserId}/transactions/${year}/${month}`,
+        );
+        set(rootRef, transactions)
+          .then(() => {
+            setSuccess(true);
+          })
+          .catch((e) => {
+            setError(e.toString());
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      }
+    },
+    [db, loggedUserId],
   );
 
   return {
     ready: !!app,
-    save,
-    load,
-    data,
+    loadTransactions,
+    saveTransactions,
     loading,
     success,
     error,

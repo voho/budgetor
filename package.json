@@ -13,6 +13,7 @@
     "@types/react-dom": "^18.2.7",
     "apexcharts": "^3.41.1",
     "firebase": "^10.2.0",
+    "papaparse": "^5.4.1",
     "react": "^18.2.0",
     "react-apexcharts": "^1.4.1",
     "react-dom": "^18.2.0",
@@ -49,6 +50,7 @@
     ]
   },
   "devDependencies": {
+    "@types/papaparse": "^5.3.8",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "eslint": "^8.47.0",
     "eslint-config-prettier": "^9.0.0",
